@@ -10,7 +10,7 @@ main, где должны быть отображены.
 Пользователь с клавиатуры вводит путь к файлу. После чего запускаются
 три потока. Первый поток заполняет файл случайными числами. Два других
 потока ожидают заполнения. Когда файл заполнен оба потока стартуют.
-Первый поток находит все простые числа, второй поток факториал каждого
+Первый поток находит все простые числа, второй поток - факториал каждого
 числа в файле. Результаты поиска каждый поток должен записать в новый файл.
 В методе main необходимо отобразить статистику выполненных операций.
 Задание 3
@@ -28,3 +28,37 @@ main, где должны быть отображены.
 с запрещенными словами) из полученного файла. В методе main необходимо
 отобразить статистику выполненных операций.
 */
+
+import java.util.Arrays;
+
+public class Main {
+    public static void main(String[] args) throws InterruptedException {
+        System.out.println("ЗАДАНИЕ 1:");
+        task1();
+    }
+
+    public static void task1() throws InterruptedException {
+
+        final int ARRAY_SIZE = 10;
+        // Создаем один экземпляр ArrayFiller и передаем его обоим рабочим потокам.
+        // Это гарантирует, что они работают с одним и тем же массивом.
+        ArrayFiller filler = new ArrayFiller(ARRAY_SIZE);
+        ArraySum sumThread = new ArraySum(filler);
+        ArrayAverage avgThread = new ArrayAverage(filler);
+        // Запускаем потоки. Порядок запуска sum и avg не важен, они все равно будут ждать.
+        sumThread.start();
+        avgThread.start();
+        // Запускаем поток заполнения. Он выполнится первым и "разбудит" остальные.
+        filler.start();
+        // Ждем завершения всех потоков, чтобы получить финальные результаты.
+        filler.join();
+        sumThread.join();
+        avgThread.join();
+
+        int[] finalArray = filler.getArray(); // На этом этапе getArray() не будет ждать, так как массив уже заполнен.
+        System.out.println("Массив: " + Arrays.toString(finalArray));
+        // Получаем и выводим сумму и среднее арифметическое из соответствующих объектов
+        System.out.println("Сумма элементов: " + sumThread.getSum());
+        System.out.println("Среднее арифметическое: " + avgThread.getAvg());
+    }
+}
