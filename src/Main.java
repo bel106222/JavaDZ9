@@ -30,11 +30,14 @@ main, где должны быть отображены.
 */
 
 import java.util.Arrays;
+import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
         System.out.println("ЗАДАНИЕ 1:");
         task1();
+        System.out.println("ЗАДАНИЕ 2:");
+        task2();
     }
 
     public static void task1() throws InterruptedException {
@@ -60,5 +63,33 @@ public class Main {
         // Получаем и выводим сумму и среднее арифметическое из соответствующих объектов
         System.out.println("Сумма элементов: " + sumThread.getSum());
         System.out.println("Среднее арифметическое: " + avgThread.getAvg());
+    }
+
+    public static void task2() throws InterruptedException {
+        final int ARRAY_SIZE = 10;
+        final int MAX_RANDOM = 20;
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Введите путь к файлу: ");
+        //String filePath = scanner.nextLine();
+        String filePath = "randoms.txt";
+        System.out.println(filePath);
+
+        // Поток для заполнения файла
+        Thread fillerThread = new Thread(new FileFiller(filePath, ARRAY_SIZE, MAX_RANDOM));
+        fillerThread.start();
+
+        // Потоки для обработки
+        Thread primeThread = new Thread(new PrimeFinder(filePath));
+        Thread factorialThread = new Thread(new FactorialCalc(filePath));
+        primeThread.start();
+        factorialThread.start();
+
+        // Ожидаем завершения всех потоков
+        fillerThread.join();
+        primeThread.join();
+        factorialThread.join();
+
+        System.out.println("Простые числа сохранены в: primes.txt");
+        System.out.println("Факториалы сохранены в: factorials.txt");
     }
 }
